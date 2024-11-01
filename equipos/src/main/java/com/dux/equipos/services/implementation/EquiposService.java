@@ -1,8 +1,9 @@
 package com.dux.equipos.services.implementation;
 
 import com.dux.equipos.application.exceptions.NotFoundException;
-import com.dux.equipos.dto.EquipoDto;
-import com.dux.equipos.dto.NotFoundDto;
+import com.dux.equipos.dto.request.RequestEquipoDto;
+import com.dux.equipos.dto.request.RequestUpdateEquipoDto;
+import com.dux.equipos.dto.response.ResponseEquipoDto;
 import com.dux.equipos.entities.Equipo;
 import com.dux.equipos.repositories.EquiposRepository;
 import com.dux.equipos.services.IEquiposService;
@@ -29,20 +30,20 @@ public class EquiposService implements IEquiposService {
     private EquiposRepository repository;
 
     @Override
-    public EquipoDto obtenerEquipo(Long id) {
+    public ResponseEquipoDto obtenerEquipo(Long id) {
 
         var equipo = repository.findById(id);
 
         if (equipo.isEmpty()) { throw new NotFoundException("Equipo no encontrado"); }
-        return objectMapper.convertValue(equipo.get(), EquipoDto.class);
+        return objectMapper.convertValue(equipo.get(), ResponseEquipoDto.class);
     }
 
     @Override
-    public List<EquipoDto> obtenerEquipoPorNombre(String nombre) {
+    public List<ResponseEquipoDto> obtenerEquipoPorNombre(String nombre) {
 
         var equipos = obtenerEquipos();
         var equiposBuscados = Arrays.stream(nombre.split(",")).toList();
-        var response = new ArrayList<EquipoDto>();
+        var response = new ArrayList<ResponseEquipoDto>();
 
         equipos.forEach(each -> {
             if (!StringUtils.isEmpty(checkIfElementIsInList(equiposBuscados, each.getNombre()))) {
@@ -54,33 +55,36 @@ public class EquiposService implements IEquiposService {
     }
 
     @Override
-    public List<EquipoDto> obtenerEquipos() {
+    public List<ResponseEquipoDto> obtenerEquipos() {
 
         var equipos = repository.findAll();
 
         if (equipos.isEmpty()) { throw new NotFoundException("No existen equipos registrados"); }
 
         return equipos.stream()
-                .map(equipo -> objectMapper.convertValue(equipo, EquipoDto.class))
+                .map(equipo -> objectMapper.convertValue(equipo, ResponseEquipoDto.class))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public EquipoDto crearEquipo(EquipoDto equipo) {
+    public ResponseEquipoDto crearEquipo(RequestEquipoDto equipo) {
 
         var equipoCrated = repository.save(objectMapper.convertValue(equipo, Equipo.class));
-
-        return objectMapper.convertValue(equipoCrated, EquipoDto.class);
+        return objectMapper.convertValue(equipoCrated, ResponseEquipoDto.class);
     }
 
     @Override
-    public EquipoDto actualizarEquipo(Long id, EquipoDto equipo) {
+    public ResponseEquipoDto actualizarEquipo(Long id, RequestEquipoDto equipo) {
 
         obtenerEquipo(id);
 
-        equipo.setId(id);
+//        if it doesn't throw the exception it means that the teams already exists, just need to update with save method
+        var updateEquipo = new RequestUpdateEquipoDto(
+                id, equipo.getNombre(), equipo.getLiga(), equipo.getPais()
+        );
 
-        return crearEquipo(equipo);
+        var updatedEquipo = repository.save(objectMapper.convertValue(updateEquipo, Equipo.class));
+        return objectMapper.convertValue(updatedEquipo, ResponseEquipoDto.class);
     }
 
     @Override

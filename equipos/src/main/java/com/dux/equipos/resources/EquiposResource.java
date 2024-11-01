@@ -1,7 +1,11 @@
 package com.dux.equipos.resources;
 
-import com.dux.equipos.dto.EquipoDto;
+import com.dux.equipos.application.swagger.SwaggerApiConfig;
+import com.dux.equipos.dto.request.RequestEquipoDto;
+import com.dux.equipos.dto.response.ResponseEquipoDto;
 import com.dux.equipos.services.IEquiposService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.dux.equipos.utils.Constantes.BASE_PATH;
+import static com.dux.equipos.utils.Constantes.*;
 
 @RestController
 @RequestMapping(BASE_PATH)
+@Tag(name = SwaggerApiConfig.API_TAG, description = SwaggerApiConfig.API_DESCRIPTION)
 public class EquiposResource {
 
     @Autowired
@@ -20,7 +25,8 @@ public class EquiposResource {
 
 
     @GetMapping
-    public ResponseEntity<List<EquipoDto>> obtenerEquipos() {
+    @Operation(summary = OBTENER_EQUIPOS_TAG)
+    public ResponseEntity<List<ResponseEquipoDto>> obtenerEquipos() {
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
@@ -28,7 +34,8 @@ public class EquiposResource {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EquipoDto> obtenerEquipo(@PathVariable Long id) {
+    @Operation(summary = OBTENER_EQUIPO_TAG)
+    public ResponseEntity<ResponseEquipoDto> obtenerEquipo(@PathVariable Long id) {
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
@@ -36,15 +43,17 @@ public class EquiposResource {
     }
 
     @GetMapping("/buscar")
-    public ResponseEntity<List<EquipoDto>> obtenerEquipoPorNombre(@RequestParam(name = "nombre") String nombre) {
+    @Operation(summary = OBTENER_EQUIPOS_NOMBRE_TAG)
+    public ResponseEntity<List<ResponseEquipoDto>> obtenerEquipoPorNombre(@RequestParam(name = "nombre") String nombre) {
 
         return ResponseEntity
-                .status(HttpStatus.FOUND)
+                .status(HttpStatus.OK)
                 .body(service.obtenerEquipoPorNombre(nombre));
     }
 
     @PostMapping
-    public ResponseEntity<EquipoDto> crearEquipo(@RequestBody EquipoDto request) {
+    @Operation(summary = CREAR_EQUIPO_TAG)
+    public ResponseEntity<ResponseEquipoDto> crearEquipo(@RequestBody RequestEquipoDto request) {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -52,7 +61,8 @@ public class EquiposResource {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EquipoDto> actualizarEquipo(@PathVariable Long id, @RequestBody EquipoDto request) {
+    @Operation(summary = ACTUALIZAR_EQUIPO_TAG)
+    public ResponseEntity<ResponseEquipoDto> actualizarEquipo(@PathVariable Long id, @RequestBody RequestEquipoDto request) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -60,6 +70,7 @@ public class EquiposResource {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = ELIMINAR_EQUIPO_TAG)
     public ResponseEntity<Void> eliminarEquipo(@PathVariable Long id) {
 
         service.eliminarEquipo(id);
